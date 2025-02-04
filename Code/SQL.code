@@ -1,0 +1,79 @@
+-- Breakdown of my sql queries to getting Sales Data for Pizzas in 2015 --
+
+  --Total Revenue-- 
+    select SUM(total_price) as total_sales
+      from pizza_sales;
+
+
+  --Average Order Value--
+    select SUM(total_price) / COUNT(distinct order_id) as Average_Order_Value
+      from pizza_sales;
+
+
+  --Total Pizzas Sold--
+    select SUM(quantity)  as Total_pizzas_sold
+      from pizza_sales;
+
+
+  --Total Orders--
+    select COUNT( distinct order_id) as Total_Orders
+      from pizza_sales;
+
+
+  --Average Pizzas per order--
+    select  SUM(quantity) / COUNT(distinct order_id) as AVG_Pizzas_PerOrder
+      from pizza_sales;
+
+
+  --Hourly Trend for Total Pizzas Sold--
+    SELECT strftime('%H', order_time) AS order_hour, 
+       SUM(quantity) AS Total_Pizzas_Sold
+       FROM pizza_sales
+    GROUP BY strftime('%H', order_time);
+
+
+  --Percentage of sales by pizza category--
+    SELECT pizza_category, SUM(total_price) as total_revenue, 
+           ROUND(SUM(total_price)*100/ (select sum(total_price) from pizza_sales) *1,1) as CPS
+        from  pizza_sales
+    group by pizza_category
+    order by CPS desc;
+
+
+  --Percentage of sales by pizza size--
+    SELECT pizza_size, pizza_category, 
+           ROUND(SUM(total_price)*100/ (select sum(total_price) from pizza_sales) *1,1) as CPS
+        from  pizza_sales
+    group by pizza_size
+    order by CPS desc;
+
+
+  --Total Pizzas sold by pizza category--
+    select pizza_category, 
+           SUM(quantity) as Total_sold
+      from pizza_sales
+    group by pizza_category
+    order by Total_sold desc;
+  
+
+
+  --Top 5 best sellers by Revenue, Total Quantity and Total Orders--
+    select distinct pizza_name, 
+           SUM(total_price) as total_revenue, 
+           SUM(quantity) as Total_quantity, 
+           COUNT(order_id) as Total_Orders
+      from pizza_sales
+    group by pizza_name
+    order by total_revenue desc
+           LIMIT 5;
+
+
+  --Bottom 5 best sellers by Revenue, Total Quantity and Total Orders--
+    select distinct pizza_name, 
+           SUM(total_price) as total_revenue, 
+           SUM(quantity) as Total_quantity, 
+           COUNT(order_id) as Total_Orders
+      from pizza_sales
+    group by pizza_name
+    order by total_revenue asc
+           limit 5;
